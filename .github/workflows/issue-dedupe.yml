@@ -1,0 +1,57 @@
+name: Check for duplicate issues
+on:
+  issues:
+    types:
+      - opened
+
+jobs:
+  dedupe_check:
+    runs-on: ubuntu-latest
+    if: github.repository == 'withastro/astro'
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Run duplicate detection agent
+        uses: warpdotdev/warp-agent-action@v1
+        with:
+          warp_api_key: ${{ secrets.WARP_API_KEY }}
+          profile: ${{ vars.WARP_AGENT_PROFILE || '' }}
+          prompt: |
+            You are a GitHub issue duplicate finder. Your task is to find issues that are duplicates of issue #${{ github.event.issue.number }} in the ${{ github.repository }} repository.
+            
+            First run:
+            ```bash
+            export GH_TOKEN=${{ secrets.GITHUB_TOKEN }}
+            ```
+            
+            Current Issue:
+            - Number: #${{ github.event.issue.number }}
+            - Title: ${{ github.event.issue.title }}
+            - Body: ${{ github.event.issue.body }}
+            
+            Task:
+            1. Use gh to search for related issues using multiple strategies:
+               - Keyword search from title and body
+               - Search for similar error messages
+               - Look for similar symptoms
+            2. Inspect top candidates with `gh issue view <number> --repo ${{ github.repository }}`
+            3. Identify which issues are true duplicates (not just similar)
+            
+            If you find duplicate issues, post a comment on issue #${{ github.event.issue.number }} using:
+            ```bash
+            gh issue comment ${{ github.event.issue.number }} --repo ${{ github.repository }} --body "<your comment>"
+            ```
+            
+            Format your comment exactly like this:
+            "This is potentially a duplicate of #1234, #5678, and #9012."
+            
+            Or if just one duplicate:
+            "This is potentially a duplicate of #1234."
+            
+            Or if two duplicates:
+            "This is potentially a duplicate of #1234 and #5678."
+            
+            Only comment if you find actual duplicates (high confidence). If unsure or no duplicates found, do nothing.
