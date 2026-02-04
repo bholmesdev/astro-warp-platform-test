@@ -7,7 +7,6 @@ on:
 jobs:
   dedupe_check:
     runs-on: ubuntu-latest
-    if: github.repository == 'withastro/astro'
     permissions:
       contents: read
       issues: write
@@ -19,6 +18,7 @@ jobs:
         with:
           warp_api_key: ${{ secrets.WARP_API_KEY }}
           profile: ${{ vars.WARP_AGENT_PROFILE || '' }}
+          environment_id: yaAgYaheK4reuB8Gc7OrlJ
           prompt: |
             You are a GitHub issue duplicate finder. Your task is to find issues that are duplicates of issue #${{ github.event.issue.number }} in the ${{ github.repository }} repository.
             

@@ -8,7 +8,6 @@ on:
 jobs:
   triage:
     runs-on: ubuntu-latest
-    if: github.repository == 'withastro/astro'
     permissions:
       contents: read
       issues: write
@@ -20,6 +19,7 @@ jobs:
         with:
           warp_api_key: ${{ secrets.WARP_API_KEY }}
           profile: ${{ vars.WARP_AGENT_PROFILE || '' }}
+          environment_id: yaAgYaheK4reuB8Gc7OrlJ
           prompt: |
             You are a GitHub bug report triage agent. Your task is to evaluate if issue #${{ github.event.issue.number }} contains sufficient information to be actionable.
 
