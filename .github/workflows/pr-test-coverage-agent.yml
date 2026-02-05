@@ -1,0 +1,38 @@
+name: PR Test Coverage Agent
+
+on:
+  pull_request:
+    types: [opened]
+
+jobs:
+  check-coverage:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+
+      - name: Check and add tests with Warp Agent
+        uses: warpdotdev/warp-agent-action@v1
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          warp_api_key: ${{ secrets.WARP_API_KEY }}
+          profile: ${{ vars.WARP_AGENT_PROFILE || '' }}
+          prompt: |
+            Review PR #${{ github.event.pull_request.number }} in ${{ github.repository }} for test coverage.
+
+            ## Instructions
+            1. Run `git diff origin/${{ github.base_ref }}...HEAD` to see the changes introduced
+            2. Identify new functions, classes, or logic that lack corresponding unit tests
+            3. Check the repo's existing test patterns to understand conventions (test location, framework, naming)
+            4. If coverage gaps exist:
+               - Write appropriate unit tests following repo conventions
+               - Run the test suite to verify tests pass
+               - Commit with message: "test: add unit tests for new code"
+               - Push to the PR branch
+            5. If coverage is adequate, do nothing
