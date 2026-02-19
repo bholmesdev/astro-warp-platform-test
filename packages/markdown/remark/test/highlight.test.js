@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 import { createMarkdownProcessor } from '../dist/index.js';
+import { normalizeLanguage } from '../dist/highlight.js';
 
 describe('highlight', () => {
 	it('highlights using shiki by default', async () => {
@@ -48,5 +49,52 @@ describe('highlight', () => {
 		const { code } = await processor.render('```mermaid\ngraph TD\nA --> B\n```');
 
 		assert.ok(!code.includes('token'));
+	});
+});
+
+describe('normalizeLanguage', () => {
+	it('resolves js to javascript', () => {
+		assert.equal(normalizeLanguage('js'), 'javascript');
+	});
+
+	it('resolves ts to typescript', () => {
+		assert.equal(normalizeLanguage('ts'), 'typescript');
+	});
+
+	it('resolves py to python', () => {
+		assert.equal(normalizeLanguage('py'), 'python');
+	});
+
+	it('resolves rb to ruby', () => {
+		assert.equal(normalizeLanguage('rb'), 'ruby');
+	});
+
+	it('resolves sh to bash', () => {
+		assert.equal(normalizeLanguage('sh'), 'bash');
+	});
+
+	it('resolves yml to yaml', () => {
+		assert.equal(normalizeLanguage('yml'), 'yaml');
+	});
+
+	it('resolves md to markdown', () => {
+		assert.equal(normalizeLanguage('md'), 'markdown');
+	});
+
+	it('returns non-aliased languages unchanged', () => {
+		assert.equal(normalizeLanguage('rust'), 'rust');
+		assert.equal(normalizeLanguage('go'), 'go');
+		assert.equal(normalizeLanguage('html'), 'html');
+	});
+
+	it('is case insensitive', () => {
+		assert.equal(normalizeLanguage('JS'), 'javascript');
+		assert.equal(normalizeLanguage('TS'), 'typescript');
+		assert.equal(normalizeLanguage('Py'), 'python');
+	});
+
+	it('trims whitespace', () => {
+		assert.equal(normalizeLanguage('  js  '), 'javascript');
+		assert.equal(normalizeLanguage('\tts\n'), 'typescript');
 	});
 });

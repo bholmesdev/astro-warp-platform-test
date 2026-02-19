@@ -11,8 +11,29 @@ type Highlighter = (
 ) => Promise<Root | string>;
 
 const languagePattern = /\blanguage-(\S+)\b/;
-// Don’t highlight math code blocks by default.
+// Don't highlight math code blocks by default.
 export const defaultExcludeLanguages = ['math'];
+
+// Common language aliases mapping
+const languageAliases: Record<string, string> = {
+	js: 'javascript',
+	ts: 'typescript',
+	py: 'python',
+	rb: 'ruby',
+	sh: 'bash',
+	yml: 'yaml',
+	md: 'markdown',
+};
+
+/**
+ * Normalizes a language identifier by resolving common aliases.
+ * @param language - The language identifier to normalize
+ * @returns The normalized language name
+ */
+export function normalizeLanguage(language: string): string {
+	const lower = language.toLowerCase().trim();
+	return languageAliases[lower] ?? lower;
+}
 
 /**
  * A hast utility to syntax highlight code blocks with a given syntax highlighter.
